@@ -4,7 +4,7 @@
 
 If you discover a security vulnerability in LicenseKit, please **do not** open a public GitHub issue. Instead, email the maintainer directly:
 
-**security@kamalahmed.me** (replace with your real address)
+**contact@techydevs.com**
 
 Please include:
 
