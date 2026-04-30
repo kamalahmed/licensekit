@@ -5,8 +5,20 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    # The plugin supports PHP 7.4+ (see composer.json `require.php`). The
+    # majors below drop PHP 7.4 / 8.0 support, so dependabot must not open
+    # PRs that would force the floor up. Revisit when the plugin's PHP
+    # floor is bumped to 8.1+.
+    ignore:
+      - dependency-name: "phpunit/phpunit"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "squizlabs/php_codesniffer"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "doctrine/instantiator"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
+    open-pull-requests-limit: 5
