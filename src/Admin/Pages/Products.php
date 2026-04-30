@@ -9,10 +9,12 @@ declare( strict_types=1 );
 
 namespace LicenseKit\Admin\Pages;
 
+use LicenseKit\EDD\DownloadMetaBox;
 use LicenseKit\Models\Product;
 use LicenseKit\Repositories\ProductRepository;
 use LicenseKit\Support\Capabilities;
 use LicenseKit\Support\Helpers;
+use LicenseKit\WooCommerce\ProductSettings as WcProductSettings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -102,7 +104,44 @@ final class Products extends AbstractPage {
 
 		$this->open( $is_edit ? __( 'Edit Product', 'licensekit' ) : __( 'Add Product', 'licensekit' ) );
 
+		$has_edd = class_exists( 'Easy_Digital_Downloads' );
+		$has_wc  = class_exists( 'WooCommerce' );
 		?>
+		<?php if ( $has_edd || $has_wc ) : ?>
+		<div class="notice notice-info inline" style="margin:12px 0 16px 0;">
+			<p style="margin:0.5em 0;">
+				<strong><?php esc_html_e( 'How LicenseKit licensing works', 'licensekit' ); ?></strong>
+			</p>
+			<p style="margin:0.5em 0;">
+				<?php
+				echo wp_kses_post(
+					__(
+						'A <em>LicenseKit Product</em> (this page) is the internal record that holds release files, the slug your client SDK uses, and is what every issued license is tied to.',
+						'licensekit'
+					)
+				);
+				?>
+			</p>
+			<p style="margin:0.5em 0;">
+				<?php
+				$names = [];
+				if ( $has_edd ) {
+					$names[] = __( 'EDD download editor', 'licensekit' );
+				}
+				if ( $has_wc ) {
+					$names[] = __( 'WooCommerce product editor', 'licensekit' );
+				}
+				echo wp_kses_post(
+					sprintf(
+						/* translators: %s: list of host product editor names, e.g. "EDD download editor and WooCommerce product editor" */
+						__( 'Whether a license is actually issued at purchase time is decided by the <strong>LicenseKit panel on the %s</strong>. That is also where tier, activation limit, and expiry are configured. Linking the IDs below is optional — the bridge auto-creates the LicenseKit Product on the first sale. Use the link fields when you want to pre-create the record (e.g. to upload releases before launch) or pin a specific slug.', 'licensekit' ),
+						implode( ' ' . __( 'and', 'licensekit' ) . ' ', $names )
+					)
+				);
+				?>
+			</p>
+		</div>
+		<?php endif; ?>
 		<form method="post">
 			<?php wp_nonce_field( 'licensekit_save_product' ); ?>
 			<input type="hidden" name="action" value="<?php echo $is_edit ? 'edit' : 'new'; ?>">
@@ -130,39 +169,33 @@ final class Products extends AbstractPage {
 						</select>
 					</td>
 				</tr>
-				<?php if ( class_exists( 'Easy_Digital_Downloads' ) ) : ?>
+				<?php if ( $has_edd ) : ?>
 				<tr>
-					<th><label for="edd_download_id"><?php esc_html_e( 'EDD Download ID', 'licensekit' ); ?></label></th>
+					<th><label for="edd_download_id"><?php esc_html_e( 'Linked EDD download', 'licensekit' ); ?></label></th>
 					<td>
 						<input name="edd_download_id" id="edd_download_id" type="number" min="0"
+							placeholder="<?php esc_attr_e( 'Download ID', 'licensekit' ); ?>"
 							value="<?php echo esc_attr( (string) ( $product->edd_download_id ?? '' ) ); ?>">
-						<?php
-						if ( ! empty( $product->edd_download_id ) ) {
-							$edd_link = get_edit_post_link( (int) $product->edd_download_id );
-							if ( $edd_link ) {
-								echo ' <a href="' . esc_url( $edit_link = $edd_link ) . '">' . esc_html__( 'Open download', 'licensekit' ) . '</a>';
-							}
-						}
-						?>
-						<p class="description"><?php esc_html_e( 'Optional — link to an EDD download to issue licenses on purchase.', 'licensekit' ); ?></p>
+						<?php $this->render_host_link_actions( (int) ( $product->edd_download_id ?? 0 ), 'edd' ); ?>
+						<p class="description">
+							<?php esc_html_e( 'Optional — point this LicenseKit Product at an EDD download. Leave empty to let the bridge auto-create the link on the first sale.', 'licensekit' ); ?>
+						</p>
+						<?php $this->render_host_toggle_status( (int) ( $product->edd_download_id ?? 0 ), 'edd' ); ?>
 					</td>
 				</tr>
 				<?php endif; ?>
-				<?php if ( class_exists( 'WooCommerce' ) ) : ?>
+				<?php if ( $has_wc ) : ?>
 				<tr>
-					<th><label for="wc_product_id"><?php esc_html_e( 'WooCommerce Product ID', 'licensekit' ); ?></label></th>
+					<th><label for="wc_product_id"><?php esc_html_e( 'Linked WooCommerce product', 'licensekit' ); ?></label></th>
 					<td>
 						<input name="wc_product_id" id="wc_product_id" type="number" min="0"
+							placeholder="<?php esc_attr_e( 'Product ID', 'licensekit' ); ?>"
 							value="<?php echo esc_attr( (string) ( $product->wc_product_id ?? '' ) ); ?>">
-						<?php
-						if ( ! empty( $product->wc_product_id ) ) {
-							$wc_link = get_edit_post_link( (int) $product->wc_product_id );
-							if ( $wc_link ) {
-								echo ' <a href="' . esc_url( $wc_link ) . '">' . esc_html__( 'Open product', 'licensekit' ) . '</a>';
-							}
-						}
-						?>
-						<p class="description"><?php esc_html_e( 'Optional — link to a WooCommerce product to issue licenses on purchase. Remember to enable the LicenseKit panel on the product editor too.', 'licensekit' ); ?></p>
+						<?php $this->render_host_link_actions( (int) ( $product->wc_product_id ?? 0 ), 'wc' ); ?>
+						<p class="description">
+							<?php esc_html_e( 'Optional — point this LicenseKit Product at a WooCommerce product. Leave empty to let the bridge auto-create the link on the first sale.', 'licensekit' ); ?>
+						</p>
+						<?php $this->render_host_toggle_status( (int) ( $product->wc_product_id ?? 0 ), 'wc' ); ?>
 					</td>
 				</tr>
 				<?php endif; ?>
@@ -182,6 +215,70 @@ final class Products extends AbstractPage {
 		</form>
 		<?php
 		$this->close();
+	}
+
+	/**
+	 * Inline "Open download/product" link rendered next to the linked-id input.
+	 * No-op when the field is empty.
+	 *
+	 * @param int    $host_post_id  EDD download id or WC product id (0 = unlinked)
+	 * @param string $host          'edd' | 'wc'
+	 */
+	private function render_host_link_actions( int $host_post_id, string $host ): void {
+		if ( $host_post_id <= 0 ) {
+			return;
+		}
+		$edit_link = get_edit_post_link( $host_post_id );
+		if ( ! $edit_link ) {
+			return;
+		}
+		$label = 'edd' === $host
+			? __( 'Open EDD download', 'licensekit' )
+			: __( 'Open WooCommerce product', 'licensekit' );
+		echo ' <a href="' . esc_url( $edit_link ) . '" target="_blank" rel="noopener">' . esc_html( $label ) . ' &rarr;</a>';
+	}
+
+	/**
+	 * Live status indicator showing whether the LicenseKit toggle is currently
+	 * ON for the linked host product. This is what actually decides if a
+	 * license is issued at purchase time, so surfacing it here removes the
+	 * "did I remember to flip the switch?" guessing.
+	 *
+	 * @param int    $host_post_id  0 = unlinked
+	 * @param string $host          'edd' | 'wc'
+	 */
+	private function render_host_toggle_status( int $host_post_id, string $host ): void {
+		if ( $host_post_id <= 0 ) {
+			return;
+		}
+
+		$enabled = 'edd' === $host
+			? DownloadMetaBox::is_licensing_enabled( $host_post_id )
+			: WcProductSettings::is_licensing_enabled( $host_post_id );
+
+		$edit_link = get_edit_post_link( $host_post_id );
+
+		if ( $enabled ) {
+			$icon  = '<span class="dashicons dashicons-yes" style="color:#46b450;vertical-align:middle;"></span>';
+			$text  = 'edd' === $host
+				? __( 'Licensing is enabled on the linked EDD download.', 'licensekit' )
+				: __( 'Licensing is enabled on the linked WooCommerce product.', 'licensekit' );
+			$style = 'color:#1d7e3a;';
+			echo '<p class="description" style="' . esc_attr( $style ) . '">' . $icon . ' ' . esc_html( $text ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput
+			return;
+		}
+
+		$icon = '<span class="dashicons dashicons-warning" style="color:#dba617;vertical-align:middle;"></span>';
+		$text = 'edd' === $host
+			? __( 'Licensing is NOT enabled on the linked EDD download — purchases will not issue a license until you check "Issue a license key on purchase" in the LicenseKit Settings box on the download editor.', 'licensekit' )
+			: __( 'Licensing is NOT enabled on the linked WooCommerce product — purchases will not issue a license until you check "Enable licensing" in the LicenseKit panel on the product editor.', 'licensekit' );
+
+		$action = $edit_link
+			? ' <a href="' . esc_url( $edit_link ) . '" target="_blank" rel="noopener">' . esc_html__( 'Open editor', 'licensekit' ) . ' &rarr;</a>'
+			: '';
+
+		// phpcs:ignore WordPress.Security.EscapeOutput -- icon, link and text are all built from translated strings + esc_url above
+		echo '<p class="description" style="color:#a26b00;">' . $icon . ' ' . esc_html( $text ) . $action . '</p>';
 	}
 
 	private function handle_save(): void {
