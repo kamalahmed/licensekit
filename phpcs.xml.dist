@@ -23,8 +23,10 @@
     <arg value="ps"/>
 
     <!--
-        WordPress.org submission ruleset. Equivalent to running PCP on the
-        plugin from the admin Plugin Check page, but works headlessly in CI.
+        WordPress.org submission ruleset for headless CI. The full Plugin
+        Check (PCP) sniffs ship inside the WP "Plugin Check" plugin and run
+        from the admin UI; the rules below cover the same WordPress coding
+        standards checks via wpcs alone, so CI doesn't need that plugin.
     -->
     <rule ref="WordPress.Security"/>
     <rule ref="WordPress.WP.AlternativeFunctions"/>
@@ -39,7 +41,6 @@
     <rule ref="WordPress.PHP.RestrictedPHPFunctions"/>
     <rule ref="WordPress.WP.EnqueuedResources"/>
     <rule ref="WordPress.WP.EnqueuedResourceParameters"/>
-    <rule ref="PluginCheck"/>
 
     <config name="minimum_supported_wp_version" value="6.0"/>
     <config name="testVersion" value="7.4-"/>
