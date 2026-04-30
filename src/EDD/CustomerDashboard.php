@@ -150,21 +150,37 @@ final class CustomerDashboard {
 
 	/** @return License[] */
 	private function licenses_for_user( int $user_id, string $email ): array {
-		$licenses = [];
+		$by_id    = [];
+		$by_email = [];
 
 		// Path 1 — EDD customer record linked to this WP user.
 		if ( function_exists( 'edd_get_customer_by' ) && $user_id > 0 ) {
 			$customer = edd_get_customer_by( 'user_id', $user_id );
 			if ( $customer && ! empty( $customer->id ) ) {
-				$licenses = $this->licenses->find_by_customer_id( (int) $customer->id );
+				$by_id = $this->licenses->find_by_customer_id( (int) $customer->id );
 			}
 		}
 
-		// Path 2 — email match (works for both EDD and WC customers).
-		if ( empty( $licenses ) && '' !== $email ) {
-			$licenses = $this->licenses->find_by_customer_email( $email );
+		// Path 2 — email match. Always run — a single shopper can hold both
+		// EDD- and WC-issued licenses, and WC licenses keep `customer_id = NULL`
+		// (the bridge stores the wp user id in `meta.wc_user_id` instead).
+		// Skipping this path when path 1 returned anything would hide WC
+		// licenses from anyone who has ever purchased through EDD.
+		if ( '' !== $email ) {
+			$by_email = $this->licenses->find_by_customer_email( $email );
 		}
 
+		// Merge, dedupe by license id, preserve newest-first ordering.
+		$seen     = [];
+		$licenses = [];
+		foreach ( array_merge( $by_id, $by_email ) as $license ) {
+			$id = (int) $license->id;
+			if ( isset( $seen[ $id ] ) ) {
+				continue;
+			}
+			$seen[ $id ]  = true;
+			$licenses[]   = $license;
+		}
 		return $licenses;
 	}
 

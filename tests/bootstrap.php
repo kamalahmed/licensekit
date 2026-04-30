@@ -39,6 +39,7 @@ function lk_test_reset_state(): void {
 		'download_secret' => 'phpunit-download',
 	];
 	$GLOBALS['__lk_transients'] = [];
+	$GLOBALS['__lk_actions']    = [];
 }
 
 if ( ! function_exists( 'wp_json_encode' ) ) {
@@ -99,6 +100,19 @@ if ( ! function_exists( 'apply_filters' ) ) {
 }
 if ( ! function_exists( 'do_action' ) ) {
 	function do_action( ...$a ) {}
+}
+if ( ! function_exists( 'add_action' ) ) {
+	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
+		$GLOBALS['__lk_actions'][ $hook ][] = [
+			'callback'      => $callback,
+			'priority'      => $priority,
+			'accepted_args' => $accepted_args,
+		];
+		return true;
+	}
+}
+if ( ! isset( $GLOBALS['__lk_actions'] ) ) {
+	$GLOBALS['__lk_actions'] = [];
 }
 if ( ! function_exists( '__' ) ) {
 	function __( $text, $domain = 'default' ) {

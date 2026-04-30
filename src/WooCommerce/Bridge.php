@@ -62,18 +62,36 @@ final class Bridge {
 	}
 
 	public function register(): void {
-		add_action( 'woocommerce_order_status_completed', [ $this, 'on_order_completed' ], 20, 1 );
-		// Issue when a refunded order is uncancelled (rare but supported).
-		add_action( 'woocommerce_order_status_processing_to_completed', [ $this, 'on_order_completed' ], 20, 1 );
+		// Issue licenses as soon as the order is paid. WC has three transitions
+		// that mean "payment recognized" depending on gateway and item mix, so we
+		// listen to all three. The per-order idempotency marker guarantees that
+		// firing on more than one of them only issues licenses once.
+		//
+		//  - `woocommerce_payment_complete`     fires inside WC_Order::payment_complete()
+		//                                        for gateways like Stripe/PayPal.
+		//  - `woocommerce_order_status_processing` catches manual gateways
+		//                                        (Cheque/BACS/COD) once the merchant
+		//                                        moves the order off `on-hold`.
+		//  - `woocommerce_order_status_completed`  catches free orders, admin-
+		//                                        completed orders, and any path
+		//                                        that skips `processing`.
+		add_action( 'woocommerce_payment_complete', [ $this, 'on_order_paid' ], 20, 1 );
+		add_action( 'woocommerce_order_status_processing', [ $this, 'on_order_paid' ], 20, 1 );
+		add_action( 'woocommerce_order_status_completed', [ $this, 'on_order_paid' ], 20, 1 );
 
 		// Refund handling — flip licenses to `revoked`.
 		add_action( 'woocommerce_order_status_refunded', [ $this, 'on_refund' ], 20, 1 );
 		add_action( 'woocommerce_order_refunded', [ $this, 'on_partial_refund' ], 20, 2 );
 	}
 
-	public function on_order_completed( int $order_id ): void {
+	public function on_order_paid( int $order_id ): void {
 		$marker = 'licensekit_processed_wc_order_' . $order_id;
 		if ( get_option( $marker ) ) {
+			return;
+		}
+		// Vendors can short-circuit issuance (e.g. require manual approval on
+		// COD orders) by returning false from this filter.
+		if ( ! (bool) apply_filters( 'licensekit_wc_should_issue_for_order', true, $order_id ) ) {
 			return;
 		}
 		$this->issue_for_order( $order_id );
