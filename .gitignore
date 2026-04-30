@@ -1,0 +1,37 @@
+# Composer — committed for WP.org distribution but excluded from the public
+# GitHub repo. Run `composer install` after cloning.
+/vendor/
+
+# Test artifacts
+/.phpunit.cache/
+/.phpunit.result.cache
+/coverage/
+/build/
+*.log
+
+# Local debugging
+/_debug.php
+/_debug-*.php
+
+# IDE / editor
+/.idea/
+/.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local environment
+/.env
+/.env.*
+!/.env.example
+
+# Distribution archives created by `composer dist`
+/licensekit-*.zip
+/dist/
+
+# Composer lockfile is committed for app code (this plugin), but kept
+# out of subdirs:
+/client-sdk/composer.lock

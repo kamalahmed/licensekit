@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<phpunit
+    bootstrap="tests/bootstrap.php"
+    colors="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    cacheResultFile=".phpunit.cache/test-results"
+    executionOrder="depends,defects"
+>
+    <testsuites>
+        <testsuite name="unit">
+            <directory>tests/Unit</directory>
+            <directory>tests/Unit/Models</directory>
+            <directory>tests/Unit/Services</directory>
+            <directory>tests/Unit/Storage</directory>
+            <directory>tests/Unit/WooCommerce</directory>
+            <directory>tests/Unit/EDD</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage>
+        <include>
+            <directory suffix=".php">src/Services</directory>
+            <directory suffix=".php">src/Models</directory>
+            <directory suffix=".php">src/Support</directory>
+        </include>
+    </coverage>
+</phpunit>

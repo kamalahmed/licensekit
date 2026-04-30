@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LicenseKit — Publishing to GitHub and WP.org</title>
+<style>
+  :root { --bg:#fff; --fg:#1a1a1a; --muted:#6b6b6b; --accent:#2a5db0; --code-bg:#f5f7fa; --code-border:#e1e4e8; --warn-bg:#fff8e1; --warn-border:#f6c34d; --info-bg:#e8f4fd; --info-border:#4a90d9; --ok-bg:#e6f4ea; --ok-border:#27ae60; --danger-bg:#fdecea; --danger-border:#e57373; }
+  * { box-sizing: border-box; }
+  body { font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--fg); margin: 0; }
+  .layout { display: flex; max-width: 1200px; margin: 0 auto; }
+  nav.toc { width: 280px; flex-shrink: 0; padding: 24px 16px; border-right: 1px solid #e5e7eb; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  nav.toc h2 { font-size: 14px; text-transform: uppercase; color: var(--muted); margin: 0 0 12px 0; }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; }
+  nav.toc li { margin: 5px 0; }
+  nav.toc a { color: var(--fg); text-decoration: none; font-size: 14px; }
+  nav.toc a:hover { color: var(--accent); }
+  nav.toc ol ol { padding-left: 14px; margin-top: 4px; }
+  nav.toc ol ol a { font-size: 13px; color: var(--muted); }
+  main { padding: 40px; max-width: 920px; }
+  h1 { font-size: 36px; margin: 0 0 8px 0; }
+  h2 { font-size: 26px; margin: 48px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #eef0f2; }
+  h3 { font-size: 19px; margin: 32px 0 8px 0; }
+  h4 { font-size: 16px; margin: 16px 0 6px 0; color: var(--accent); }
+  p, li { line-height: 1.65; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-size: 0.9em; border: 1px solid var(--code-border); }
+  pre { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+  pre code { background: none; padding: 0; border: none; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eef0f2; vertical-align: top; }
+  th { background: #f9fafb; font-weight: 600; }
+  .lead { font-size: 18px; color: var(--muted); margin-bottom: 24px; }
+  .callout { border-left: 4px solid; border-radius: 4px; padding: 12px 16px; margin: 16px 0; }
+  .callout-warn { background: var(--warn-bg); border-color: var(--warn-border); }
+  .callout-info { background: var(--info-bg); border-color: var(--info-border); }
+  .callout-ok { background: var(--ok-bg); border-color: var(--ok-border); }
+  .callout-danger { background: var(--danger-bg); border-color: var(--danger-border); }
+  .step { background: #f9fafb; border-left: 3px solid var(--accent); padding: 12px 16px; margin: 16px 0; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 40px 0; }
+  .pill { display: inline-block; background: #f0f4f9; border-radius: 12px; padding: 1px 10px; font-size: 12px; color: #4a5568; margin-right: 4px; }
+  .pill-time { background: #fef3c7; color: #78350f; }
+  .pill-action { background: #dbeafe; color: #1e3a8a; }
+  @media (max-width: 900px) { .layout { flex-direction: column; } nav.toc { width: 100%; height: auto; position: static; } main { padding: 24px; } }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+<h2>On this page</h2>
+<ol>
+  <li><a href="#timeline">Timeline at a glance</a></li>
+  <li><a href="#prep">Pre-flight checks</a></li>
+  <li><a href="#github">Phase 1: GitHub</a>
+    <ol>
+      <li><a href="#github-account">Account &amp; repo</a></li>
+      <li><a href="#github-push">First push</a></li>
+      <li><a href="#github-tag">Tag the release</a></li>
+    </ol>
+  </li>
+  <li><a href="#wp-account">Phase 2: WP.org account</a></li>
+  <li><a href="#wp-zip">Phase 3: Build a clean submission zip</a></li>
+  <li><a href="#wp-submit">Phase 4: Submit for review</a></li>
+  <li><a href="#wp-review">Phase 5: The review process</a></li>
+  <li><a href="#svn-intro">Phase 6: SVN crash course</a>
+    <ol>
+      <li><a href="#svn-vs-git">SVN vs Git in 2 minutes</a></li>
+      <li><a href="#svn-layout">The repo layout</a></li>
+      <li><a href="#svn-checkout">Check out your repo</a></li>
+      <li><a href="#svn-first-commit">First commit to trunk</a></li>
+      <li><a href="#svn-tag">Tag your release</a></li>
+      <li><a href="#svn-assets">Upload banner + icon</a></li>
+    </ol>
+  </li>
+  <li><a href="#wp-live">Phase 7: Going live</a></li>
+  <li><a href="#updates">Phase 8: Subsequent updates</a></li>
+  <li><a href="#automate">Phase 9: Automating SVN from GitHub</a></li>
+  <li><a href="#problems">If something goes wrong</a></li>
+</ol>
+</nav>
+
+<main>
+
+<h1>Publishing LicenseKit</h1>
+<p class="lead">A complete walkthrough from "I have working code" to "live on wordpress.org/plugins/licensekit". Written for first-time submitters; assumes no SVN experience.</p>
+
+<hr>
+
+<h2 id="timeline">Timeline at a glance</h2>
+
+<table>
+  <thead><tr><th>Phase</th><th>What you do</th><th>How long</th></tr></thead>
+  <tbody>
+    <tr><td>1. GitHub</td><td>Push code, tag v0.1.0, GitHub Actions builds the zip.</td><td><span class="pill pill-time">~30 min</span></td></tr>
+    <tr><td>2. WP.org account</td><td>Create your wordpress.org account.</td><td><span class="pill pill-time">~5 min</span></td></tr>
+    <tr><td>3. Build clean zip</td><td>Strip dev files, run Plugin Check.</td><td><span class="pill pill-time">~15 min</span></td></tr>
+    <tr><td>4. Submit</td><td>Upload to plugins.svn.wordpress.org submit form.</td><td><span class="pill pill-time">~10 min</span></td></tr>
+    <tr><td>5. Wait</td><td>Reviewers respond by email.</td><td><span class="pill pill-time">1–6 weeks</span></td></tr>
+    <tr><td>6. SVN basics</td><td>Check out, commit, tag.</td><td><span class="pill pill-time">~30 min one-off</span></td></tr>
+    <tr><td>7. Go live</td><td>Listing publishes within minutes of your first commit.</td><td><span class="pill pill-time">~15 min</span></td></tr>
+    <tr><td>8. Updates</td><td>Bump version → tag in SVN.</td><td><span class="pill pill-time">~10 min each</span></td></tr>
+    <tr><td>9. Automate</td><td>(Optional) GitHub Action deploys to SVN on tag.</td><td><span class="pill pill-time">~30 min one-off</span></td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-info">
+  <strong>Plan for ~6 weeks total.</strong> The wp.org review queue is the bottleneck and entirely outside your control. The <em>active work</em> on your end is roughly 2 hours, spread across the timeline above.
+</div>
+
+<hr>
+
+<h2 id="prep">Pre-flight checks</h2>
+
+<p>Before submitting, confirm all of these are true. Each one is a common rejection reason.</p>
+
+<table>
+  <thead><tr><th>Check</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>Plugin slug not taken</td><td><a href="https://wordpress.org/plugins/search/licensekit/">licensekit search</a> returned 0 results.</td></tr>
+    <tr><td>License is GPL-compatible</td><td>GPL-2.0-or-later. ✓</td></tr>
+    <tr><td><code>readme.txt</code> follows wp.org spec</td><td>Validate at <a href="https://wpreadme.com/">wpreadme.com</a> or <a href="https://wordpress.org/plugins/developers/readme-validator/">official validator</a>.</td></tr>
+    <tr><td>Plugin Check passes</td><td>Run <em>Tools → Plugin Check</em> in admin against LicenseKit. 0 errors required; 0 warnings preferred.</td></tr>
+    <tr><td>Plugin header is complete</td><td>Plugin Name, Version, Description, License, Text Domain, Requires at least, Requires PHP all present. ✓</td></tr>
+    <tr><td>External services disclosed</td><td><code>readme.txt</code> "External services" section explains every outbound HTTP call. ✓</td></tr>
+    <tr><td>No obfuscation</td><td>No <code>eval()</code>, no <code>base64_decode()</code> on opaque strings, no minified PHP. ✓</td></tr>
+    <tr><td>Trademark-clean</td><td>"License" + "Kit" — generic words, neither trademarked.</td></tr>
+    <tr><td>No premium features locked behind upsells</td><td>Everything advertised is in the free zip. ✓</td></tr>
+    <tr><td>Test on PHP 7.4 minimum</td><td>CI runs PHP 7.4–8.3. ✓</td></tr>
+    <tr><td>Tested up to current WP</td><td><code>Tested up to: 6.7</code> in <code>readme.txt</code>. Update with each WP release.</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2 id="github">Phase 1: GitHub</h2>
+
+<h3 id="github-account">Account &amp; repo</h3>
+
+<div class="step">
+<ol>
+  <li>Sign in to <a href="https://github.com/">github.com</a>.</li>
+  <li>Click <strong>+ → New repository</strong>.</li>
+  <li>Name it <code>licensekit</code>. Public. Do <strong>not</strong> add a README, .gitignore, or LICENSE — we already have ours.</li>
+  <li>Create.</li>
+</ol>
+</div>
+
+<h3 id="github-push">First push</h3>
+
+<div class="step">
+<pre><code>cd "/Users/kamalahmed/Local Sites/wp/app/public/wp-content/plugins/licensekit"
+
+# Sanity: only commit what should be public.
+git status
+
+# Initialize and push
+git init -b main
+git add .
+git commit -m "Initial release v0.1.0"
+git remote add origin git@github.com:kamalahmed/licensekit.git
+git push -u origin main</code></pre>
+</div>
+
+<p>Open the repo on GitHub. The <strong>Actions</strong> tab should show <code>Tests</code> and <code>PHPCS</code> running on your push. Both should turn green within ~3 minutes.</p>
+
+<h3 id="github-tag">Tag the release</h3>
+
+<div class="step">
+<pre><code>git tag v0.1.0
+git push origin v0.1.0</code></pre>
+</div>
+
+<p>This triggers the <code>release.yml</code> workflow which builds <code>licensekit-0.1.0.zip</code> and attaches it to the <strong>Releases</strong> page on GitHub. Anyone can install from that zip immediately.</p>
+
+<div class="callout callout-ok">
+  <strong>You're done with GitHub.</strong> Existing customers can clone or download the zip from your Releases page. Now move on to WP.org for wider distribution.
+</div>
+
+<hr>
+
+<h2 id="wp-account">Phase 2: WP.org account</h2>
+
+<div class="step">
+<ol>
+  <li>Visit <a href="https://login.wordpress.org/register">login.wordpress.org/register</a>.</li>
+  <li>Pick a username. <strong>This is permanent and public</strong> — it'll show up as the plugin author on every install. Use the same handle you used in <code>readme.txt</code>'s <code>Contributors:</code> line. We have <code>kamalahmed</code> there.</li>
+  <li>Confirm your email.</li>
+</ol>
+</div>
+
+<p>The wp.org username and the slug you'll claim later (<code>licensekit</code>) are different things — usernames identify <em>you</em>, slugs identify the plugin.</p>
+
+<hr>
+
+<h2 id="wp-zip">Phase 3: Build a clean submission zip</h2>
+
+<p>Reviewers want a zip that looks exactly like what you'd ship to a customer — no dev tooling, no tests, no <code>vendor/</code> folder unless required.</p>
+
+<div class="step">
+<pre><code>cd "/Users/kamalahmed/Local Sites/wp/app/public/wp-content/plugins/licensekit"
+
+# Install production dependencies (no dev deps).
+composer install --no-dev --optimize-autoloader
+
+# Stage a clean copy.
+mkdir -p /tmp/lk-submit/licensekit
+rsync -a \
+  --exclude='/.github' \
+  --exclude='/.git' \
+  --exclude='/.gitignore' \
+  --exclude='/.phpunit.cache' \
+  --exclude='/build' \
+  --exclude='/coverage' \
+  --exclude='/tests' \
+  --exclude='/docs' \
+  --exclude='/phpunit.xml.dist' \
+  --exclude='/phpcs.xml.dist' \
+  --exclude='/CONTRIBUTING.md' \
+  --exclude='/SECURITY.md' \
+  --exclude='/CHANGELOG.md' \
+  --exclude='/_debug*' \
+  ./ /tmp/lk-submit/licensekit/
+
+# Make the zip.
+cd /tmp/lk-submit
+zip -rq licensekit-0.1.0.zip licensekit
+ls -lh licensekit-0.1.0.zip
+
+# Restore dev dependencies in your working copy.
+cd "/Users/kamalahmed/Local Sites/wp/app/public/wp-content/plugins/licensekit"
+composer install</code></pre>
+</div>
+
+<p>Then run <strong>one final pass</strong> through Plugin Check on your local WordPress against the zipped version:</p>
+
+<div class="step">
+<ol>
+  <li>WP admin → <strong>Plugins → Add New → Upload Plugin</strong> → upload <code>licensekit-0.1.0.zip</code>.</li>
+  <li>Activate it under a different folder if needed (or temporarily deactivate the dev copy).</li>
+  <li><strong>Tools → Plugin Check</strong> → select LicenseKit → Run Checks.</li>
+  <li>You should see 0 errors. Warnings are tolerated; errors block submission.</li>
+</ol>
+</div>
+
+<hr>
+
+<h2 id="wp-submit">Phase 4: Submit for review</h2>
+
+<div class="step">
+<ol>
+  <li>Sign in at <a href="https://wordpress.org/plugins/developers/add/">wordpress.org/plugins/developers/add/</a>.</li>
+  <li>Read the rules. They're short, take 5 minutes — every word matters.</li>
+  <li>Upload <code>licensekit-0.1.0.zip</code>.</li>
+  <li>Submit.</li>
+</ol>
+</div>
+
+<p>You'll see a confirmation page with your tracking number. The slug <code>licensekit</code> is now <strong>reserved</strong> in your name — even before approval, no one else can claim it.</p>
+
+<hr>
+
+<h2 id="wp-review">Phase 5: The review process</h2>
+
+<p>Reviewers will respond by email. Common outcomes:</p>
+
+<table>
+  <thead><tr><th>Outcome</th><th>What it means</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Approved</strong></td><td>You'll receive SVN credentials and instructions. Skip to Phase 6.</td></tr>
+    <tr><td><strong>Approved with comments</strong></td><td>Minor issues to fix in your next commit. Approval still happens.</td></tr>
+    <tr><td><strong>Needs changes</strong></td><td>Specific issues that must be fixed before approval. Reply to the email with a new zip.</td></tr>
+    <tr><td><strong>Rejected</strong></td><td>Rare; usually because of guideline violations (trademark, incompatible license, etc.). Reviewers explain why.</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warn">
+  <strong>Reply to all reviewer emails promptly.</strong> Submissions that go silent for 30+ days get closed and you have to start over. If you need more time, just say so.
+</div>
+
+<p>Typical wait time: 1–6 weeks. Sometimes faster, sometimes slower. Don't email them asking for status — your message goes to the bottom of the queue.</p>
+
+<hr>
+
+<h2 id="svn-intro">Phase 6: SVN crash course</h2>
+
+<h3 id="svn-vs-git">SVN vs Git in 2 minutes</h3>
+
+<p>You only need to know three things to publish a WordPress plugin via SVN:</p>
+
+<table>
+  <thead><tr><th>Concept</th><th>Git equivalent</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>svn checkout URL</code></td><td><code>git clone</code></td><td>Download the entire SVN repo to your laptop.</td></tr>
+    <tr><td><code>svn add</code> + <code>svn commit</code></td><td><code>git add</code> + <code>git commit</code> + <code>git push</code></td><td>Stage and upload changes to the server in one step (no local commits).</td></tr>
+    <tr><td><code>svn copy</code> for tags</td><td><code>git tag</code> + push</td><td>Mark a version. SVN tags are real directory copies, not metadata pointers.</td></tr>
+  </tbody>
+</table>
+
+<p>You don't need branching, merging, or rebasing for plugin distribution. WordPress only cares about <code>trunk/</code> (the always-current dev version), <code>tags/</code> (released versions), and <code>assets/</code> (banners and icons).</p>
+
+<h3 id="svn-layout">The repo layout</h3>
+
+<pre><code>https://plugins.svn.wordpress.org/licensekit/
+├── trunk/                    ← your latest code (mirrors a working copy)
+│   ├── licensekit.php
+│   ├── readme.txt
+│   ├── src/
+│   ├── client-sdk/
+│   └── ... etc
+├── tags/                     ← real directory copies of trunk at each release
+│   ├── 0.1.0/
+│   ├── 0.1.1/
+│   └── 0.2.0/
+└── assets/                   ← banners, icons, screenshots (NOT shipped to users)
+    ├── icon-128x128.png
+    ├── icon-256x256.png
+    ├── banner-772x250.png
+    ├── banner-1544x500.png  (high-DPI)
+    ├── screenshot-1.png
+    └── screenshot-2.png
+</code></pre>
+
+<div class="callout callout-info">
+  <strong>The <code>Stable tag:</code> line in your <code>readme.txt</code> is what controls which version users actually download.</strong> If <code>Stable tag: 0.1.0</code>, then <code>tags/0.1.0/</code> is what gets installed — even if <code>trunk/</code> has newer code. To roll back, edit <code>Stable tag</code> in <code>trunk/readme.txt</code> back to a known-good version.
+</div>
+
+<h3 id="svn-checkout">Check out your repo</h3>
+
+<p>First, install SVN if it's not already on your Mac:</p>
+
+<pre><code>brew install svn</code></pre>
+
+<p>Then check out your wp.org repo to a directory of your choice:</p>
+
+<pre><code>cd ~
+mkdir wp-svn && cd wp-svn
+
+# This URL comes from your approval email; the path /licensekit/ is your slug.
+svn checkout https://plugins.svn.wordpress.org/licensekit/ licensekit-svn
+cd licensekit-svn
+
+# After checkout you'll see three empty directories:
+ls
+# assets/  branches/  tags/  trunk/</code></pre>
+
+<p><code>branches/</code> exists by convention but plugins don't use it. Ignore it.</p>
+
+<h3 id="svn-first-commit">First commit to trunk</h3>
+
+<p>Your trunk should mirror exactly what's in your release zip. Easiest path: copy the staged release files into trunk.</p>
+
+<pre><code># From the SVN checkout root:
+cd ~/wp-svn/licensekit-svn
+
+# Copy the prepared release files into trunk.
+rsync -av --delete /tmp/lk-submit/licensekit/ trunk/
+
+# Tell SVN about new files.
+svn status                    # Lists files with ?, !, or M markers
+svn add trunk/* --force       # Stage everything new
+
+# Commit. The first commit may be large — be patient.
+svn commit -m "Initial v0.1.0 release"</code></pre>
+
+<p>SVN will prompt for your wp.org password. After commit, your plugin's listing page goes live within ~15 minutes.</p>
+
+<h3 id="svn-tag">Tag your release</h3>
+
+<p>SVN tags are directory copies. To release v0.1.0 officially:</p>
+
+<pre><code>svn copy trunk tags/0.1.0
+svn commit -m "Tagging v0.1.0"</code></pre>
+
+<p>Now <code>tags/0.1.0/</code> exists as a permanent snapshot. Confirm <code>readme.txt</code>'s <code>Stable tag: 0.1.0</code> matches.</p>
+
+<h3 id="svn-assets">Upload banner + icon</h3>
+
+<p>The <code>assets/</code> folder lives <em>outside</em> trunk and isn't shipped to users — these images only appear on your wp.org listing page.</p>
+
+<table>
+  <thead><tr><th>File</th><th>Size</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>icon-128x128.png</code></td><td>128 × 128</td><td>Standard icon (Plugins screen, search results)</td></tr>
+    <tr><td><code>icon-256x256.png</code></td><td>256 × 256</td><td>Retina icon</td></tr>
+    <tr><td><code>banner-772x250.png</code></td><td>772 × 250</td><td>Top of your listing page</td></tr>
+    <tr><td><code>banner-1544x500.png</code></td><td>1544 × 500</td><td>Retina banner</td></tr>
+    <tr><td><code>screenshot-1.png</code></td><td>up to 2880 × 1800</td><td>First screenshot — referenced as "1" in <code>readme.txt</code>'s Screenshots section</td></tr>
+    <tr><td><code>screenshot-2.png</code></td><td></td><td>Second screenshot, etc.</td></tr>
+  </tbody>
+</table>
+
+<pre><code># Drop your image files into ./assets/ then:
+svn add assets/*
+svn commit -m "Add banner, icon, screenshots"</code></pre>
+
+<div class="callout callout-warn">
+  <strong>If you don't have artwork yet, ship without it.</strong> The plugin still works perfectly. You can add banner + icon any time later with another <code>svn commit</code>. A placeholder gradient is better than waiting.
+</div>
+
+<hr>
+
+<h2 id="wp-live">Phase 7: Going live</h2>
+
+<p>~15 minutes after your first <code>svn commit</code>:</p>
+
+<ul>
+  <li>Your listing page goes live at <code>https://wordpress.org/plugins/licensekit/</code>.</li>
+  <li>The plugin appears in WordPress admin's <strong>Plugins → Add New</strong> search.</li>
+  <li>Anyone can install it from their WP admin without ever visiting your site.</li>
+  <li>If you tagged <code>0.1.0</code>, that's what they install.</li>
+</ul>
+
+<div class="callout callout-ok">
+  <strong>Smoke test from a fresh WP:</strong> spin up a clean WordPress install and search "LicenseKit" in <em>Plugins → Add New</em>. Install. Activate. Verify it works end-to-end. If anything's broken on a fresh install that worked locally, fix it in trunk and bump the patch version (see Phase 8).
+</div>
+
+<hr>
+
+<h2 id="updates">Phase 8: Subsequent updates</h2>
+
+<p>For every new release:</p>
+
+<div class="step">
+<ol>
+  <li><strong>In your dev repo (Git side):</strong>
+    <ul>
+      <li>Make changes. Commit and push to GitHub.</li>
+      <li>Bump the version number in three places: <code>licensekit.php</code> header, <code>readme.txt</code> <code>Stable tag:</code>, and <code>licensekit.php</code>'s <code>LICENSEKIT_VERSION</code> constant.</li>
+      <li>Add a <code>= 0.1.1 =</code> section to <code>readme.txt</code>'s Changelog.</li>
+      <li>Tag in Git: <code>git tag v0.1.1 && git push origin v0.1.1</code>. GitHub Actions builds the zip and attaches it to the Releases page.</li>
+    </ul>
+  </li>
+  <li><strong>In your SVN checkout:</strong>
+    <pre><code>cd ~/wp-svn/licensekit-svn
+
+# Pull any other tags or external changes (rare for solo dev).
+svn update
+
+# Sync trunk from the new release files.
+rsync -av --delete /tmp/lk-submit/licensekit/ trunk/
+
+# Track new files / removals.
+svn status
+svn add trunk/* --force
+svn commit -m "Release v0.1.1"
+
+# Tag the new release.
+svn copy trunk tags/0.1.1
+svn commit -m "Tagging v0.1.1"</code></pre>
+  </li>
+  <li>Within ~15 minutes, every site with auto-updates enabled sees the new version.</li>
+</ol>
+</div>
+
+<hr>
+
+<h2 id="automate">Phase 9: Automating SVN from GitHub</h2>
+
+<p>Manual SVN gets tedious. The standard fix is the <a href="https://github.com/marketplace/actions/wordpress-plugin-deploy">10up/action-wordpress-plugin-deploy</a> action — it watches for Git tags, pushes the matching release to SVN trunk and tags automatically.</p>
+
+<p>Add this workflow file to your repo:</p>
+
+<pre><code class="yaml"># .github/workflows/wp-org-deploy.yml
+name: Deploy to WordPress.org
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          tools: composer:v2
+
+      - name: Install production dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Deploy to WordPress.org
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.WP_SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.WP_SVN_PASSWORD }}
+          SLUG: licensekit
+</code></pre>
+
+<p>Then in your GitHub repo: <strong>Settings → Secrets and variables → Actions → New repository secret</strong>:</p>
+
+<table>
+  <thead><tr><th>Name</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td><code>WP_SVN_USERNAME</code></td><td>Your wp.org username (e.g. <code>kamalahmed</code>)</td></tr>
+    <tr><td><code>WP_SVN_PASSWORD</code></td><td>Your wp.org password (or app password)</td></tr>
+  </tbody>
+</table>
+
+<p>From now on, your release flow is just:</p>
+
+<pre><code>git tag v0.1.1
+git push origin v0.1.1
+# … 5 minutes later, v0.1.1 is live on wp.org.</code></pre>
+
+<div class="callout callout-info">
+  <strong>This action handles the same things you'd do manually:</strong> reads <code>.distignore</code> or <code>.gitattributes</code> to exclude dev files, syncs to trunk, copies trunk to <code>tags/&lt;version&gt;</code>, and uploads anything in <code>.wordpress-org/</code> to <code>assets/</code>.
+</div>
+
+<hr>
+
+<h2 id="problems">If something goes wrong</h2>
+
+<table>
+  <thead><tr><th>Symptom</th><th>Likely cause / fix</th></tr></thead>
+  <tbody>
+    <tr><td>Plugin Check shows errors after upload</td><td>Run <em>Tools → Plugin Check</em> on your local WP first. Fix every error. PCP errors are blocking.</td></tr>
+    <tr><td>"Slug already exists" on submission</td><td>Search wp.org for the slug. If a closed/abandoned plugin holds it, you'd need to email plugins@wordpress.org with a takeover request.</td></tr>
+    <tr><td>Reviewer asks for changes</td><td>Reply to their email. Attach a fresh zip. Expect a few rounds.</td></tr>
+    <tr><td><code>svn commit</code> fails with auth error</td><td>Double-check your wp.org username/password. The first commit specifically may need <code>--username your_username</code>.</td></tr>
+    <tr><td>Pushed wrong code to trunk</td><td><code>svn revert</code> + redo the rsync. Or commit a fix forward — SVN doesn't punish bad commits.</td></tr>
+    <tr><td>Customers report "license invalid" after I rotated wp-config secrets</td><td>You broke the signing keypair on your shop site. Customers' SDKs verify with the old public key. Either revert the secret or ship a plugin update with the new <code>public_key</code>.</td></tr>
+    <tr><td>Want to roll back a bad release</td><td>Edit <code>readme.txt</code> in trunk: change <code>Stable tag:</code> to a known-good version. Commit. New installs revert immediately. Then push a fix forward.</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<p style="color: var(--muted); font-size: 14px; margin-top: 48px;">
+This guide describes WP.org's process as of 2026. If anything reads outdated, please <a href="https://github.com/kamalahmed/licensekit/issues">open an issue</a>.
+</p>
+
+</main>
+</div>
+</body>
+</html>

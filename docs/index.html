@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LicenseKit — Documentation</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #2a5db0;
+    --code-bg: #f5f7fa;
+    --code-border: #e1e4e8;
+    --warn-bg: #fff8e1;
+    --warn-border: #f6c34d;
+    --danger-bg: #fdecea;
+    --danger-border: #e57373;
+    --info-bg: #e8f4fd;
+    --info-border: #4a90d9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+  }
+  .layout { display: flex; max-width: 1200px; margin: 0 auto; }
+  nav.toc {
+    width: 260px;
+    flex-shrink: 0;
+    padding: 24px 16px;
+    border-right: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  nav.toc h2 { font-size: 14px; text-transform: uppercase; color: var(--muted); margin: 0 0 12px 0; }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; }
+  nav.toc li { margin: 4px 0; }
+  nav.toc a { color: var(--fg); text-decoration: none; font-size: 14px; }
+  nav.toc a:hover { color: var(--accent); }
+  nav.toc ol ol { padding-left: 16px; }
+  main { padding: 40px; max-width: 920px; }
+  h1 { font-size: 36px; margin: 0 0 8px 0; }
+  h2 { font-size: 26px; margin: 48px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #eef0f2; }
+  h3 { font-size: 19px; margin: 32px 0 8px 0; }
+  h4 { font-size: 16px; margin: 16px 0 6px 0; color: var(--accent); }
+  p, li { line-height: 1.65; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-size: 0.9em; border: 1px solid var(--code-border); }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; border: none; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eef0f2; vertical-align: top; }
+  th { background: #f9fafb; font-weight: 600; }
+  .lead { font-size: 18px; color: var(--muted); margin-bottom: 24px; }
+  .callout {
+    border-left: 4px solid;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 16px 0;
+  }
+  .callout-warn { background: var(--warn-bg); border-color: var(--warn-border); }
+  .callout-info { background: var(--info-bg); border-color: var(--info-border); }
+  .callout-danger { background: var(--danger-bg); border-color: var(--danger-border); }
+  .callout strong { font-weight: 600; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 40px 0; }
+  .pill {
+    display: inline-block;
+    background: #f0f4f9;
+    border-radius: 12px;
+    padding: 1px 10px;
+    font-size: 12px;
+    color: #4a5568;
+    margin-right: 4px;
+  }
+  .role-vendor { background: #e3f2fd; color: #0d47a1; }
+  .role-customer { background: #f3e5f5; color: #4a148c; }
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; }
+    nav.toc { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid #e5e7eb; }
+    main { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+<h2>On this page</h2>
+<ol>
+  <li><a href="#what-is-licensekit">What is LicenseKit</a></li>
+  <li><a href="#two-roles">Two roles: vendor &amp; customer</a></li>
+  <li><a href="#install-vendor">Vendor installation</a></li>
+  <li><a href="#sell-product">Sell your first licensed product
+    <ol>
+      <li><a href="#sell-edd">via Easy Digital Downloads</a></li>
+      <li><a href="#sell-wc">via WooCommerce</a></li>
+    </ol>
+  </a></li>
+  <li><a href="#integrate-sdk">Integrate the SDK in your plugin or theme</a></li>
+  <li><a href="#sdk-config">Client SDK configuration reference</a></li>
+  <li><a href="#customer-flow">What customers experience</a></li>
+  <li><a href="#license-states">License states and lifecycle</a></li>
+  <li><a href="#admin-pages">Vendor admin pages</a></li>
+  <li><a href="#rest-api">Vendor REST API</a></li>
+  <li><a href="#webhooks">Webhooks</a></li>
+  <li><a href="#security">Security model</a></li>
+  <li><a href="#production-checklist">Production checklist</a></li>
+  <li><a href="#extension-filters">Extension filters</a></li>
+  <li><a href="#troubleshooting">Troubleshooting</a></li>
+  <li><a href="#faq">FAQ</a></li>
+</ol>
+</nav>
+
+<main>
+
+<h1>LicenseKit Documentation</h1>
+<p class="lead">A self-hosted licensing and update server for WordPress plugins and themes. Sells via Easy Digital Downloads or WooCommerce. Includes a single-file client SDK.</p>
+
+<hr>
+
+<h2 id="what-is-licensekit">What is LicenseKit?</h2>
+
+<p>LicenseKit turns your WordPress site into a complete licensing infrastructure for the plugins and themes you sell. It handles three things:</p>
+
+<ol>
+  <li><strong>License issuance</strong> — when a customer buys your product through EDD or WooCommerce, a unique license key is generated and emailed to them.</li>
+  <li><strong>License validation</strong> — the customer's installed plugin or theme periodically checks in with your server to confirm the license is still valid.</li>
+  <li><strong>Update delivery</strong> — when you upload a new version, the customer's WordPress sees the update through its standard "Updates" screen, exactly as if it came from wp.org.</li>
+</ol>
+
+<p>LicenseKit is a drop-in replacement for paid extensions like EDD Software Licensing. It works for both Easy Digital Downloads and WooCommerce. It's GPL-2.0+, self-hosted, and you keep 100% control of your licensing infrastructure.</p>
+
+<hr>
+
+<h2 id="two-roles">Two roles: vendor and customer</h2>
+
+<p>To understand how LicenseKit works, separate the two roles:</p>
+
+<table>
+  <thead>
+    <tr><th>Role</th><th>Who</th><th>Where</th><th>What they do</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="pill role-vendor">Vendor</span></td>
+      <td>You</td>
+      <td>Your shop site, e.g. <code>shop.example.com</code></td>
+      <td>Install LicenseKit + EDD or WooCommerce, list products, upload releases. Your products' sales and license records all live here.</td>
+    </tr>
+    <tr>
+      <td><span class="pill role-customer">Customer</span></td>
+      <td>Your buyers</td>
+      <td>Their own WordPress sites</td>
+      <td>Install your plugin or theme, paste their license key into a field, click Activate. Receive automatic updates from your server.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-info">
+  <strong>Customers never see LicenseKit's admin or settings.</strong> The server URL and the public verification key are <em>baked into your plugin source by you</em> before you ship it. The customer only ever interacts with a license-key input field your plugin renders.
+</div>
+
+<hr>
+
+<h2 id="install-vendor">Vendor installation</h2>
+
+<p>One-time setup on your shop site (e.g. <code>shop.example.com</code>):</p>
+
+<ol>
+  <li>Install and activate <strong>WordPress 6.0 or newer</strong>, <strong>PHP 7.4 or newer</strong>.</li>
+  <li>Install and activate either <strong>Easy Digital Downloads</strong> or <strong>WooCommerce</strong> (or both).</li>
+  <li>Upload <code>licensekit.zip</code>, install and activate it from the Plugins screen.</li>
+  <li>Open <strong>License Kit → Settings</strong> in the admin.</li>
+  <li>Copy the <strong>Ed25519 public key</strong> at the top of the page. You'll paste this into your plugin or theme source code in a moment.</li>
+</ol>
+
+<div class="callout callout-warn">
+  <strong>Production hardening:</strong> Move the secrets into <code>wp-config.php</code> for production:
+  <pre><code>define( 'LICENSEKIT_HASH_PEPPER',     'paste-from-Settings' );
+define( 'LICENSEKIT_DOWNLOAD_SECRET', 'paste-from-Settings' );
+define( 'LICENSEKIT_HMAC_SECRET',     'paste-from-Settings' );
+define( 'LICENSEKIT_SIGN_SECRET',     'paste-from-Settings' );
+define( 'LICENSEKIT_SIGN_PUBLIC',     'paste-from-Settings' );</code></pre>
+  Keeping secrets out of the database means a leaked DB backup alone can't be used to forge license validation responses or decrypt stored keys.
+</div>
+
+<hr>
+
+<h2 id="sell-product">Sell your first licensed product</h2>
+
+<h3 id="sell-edd">via Easy Digital Downloads</h3>
+
+<ol>
+  <li><strong>Downloads → Add New.</strong> Create a download for your plugin (e.g. "Loginless Pro").</li>
+  <li>Upload your plugin's <code>.zip</code> as the download file in the standard EDD <em>Download Files</em> section.</li>
+  <li>Scroll to the <strong>LicenseKit Settings</strong> meta box in the right sidebar:
+    <ul>
+      <li>Check <strong>Issue a license key on purchase</strong>.</li>
+      <li>Pick a tier (Single site, Five sites, Unlimited, or Custom).</li>
+      <li>Set <strong>Sites per license</strong> (e.g. <code>1</code>; use <code>0</code> for unlimited).</li>
+      <li>Pick an expiry: 1 year, 6 months, 1 month, or Lifetime.</li>
+    </ul>
+  </li>
+  <li>Publish the download. Customers can now buy it through your storefront.</li>
+</ol>
+
+<p>That's it. When a purchase completes, LicenseKit auto-creates a matching <strong>Product</strong> record (linked to the EDD download), issues a license key for the buyer, and emails it to them.</p>
+
+<h3 id="sell-wc">via WooCommerce</h3>
+
+<p><em>WooCommerce integration is coming in v1.1.</em> The mechanics will mirror EDD: a "LicenseKit Settings" panel on the product editor, license issuance hooked on <code>woocommerce_order_status_completed</code>, and a "My Licenses" section in the WooCommerce My Account area.</p>
+
+<hr>
+
+<h2 id="integrate-sdk">Integrate the SDK in your plugin or theme</h2>
+
+<p>The Client SDK is a single PHP file that runs inside <em>your customer's</em> plugin or theme. It handles license activation, validation, the Activate/Deactivate UI, and update delivery. Three steps to integrate.</p>
+
+<h3>Step 1 — Copy the SDK file</h3>
+
+<p>Take <code>client-sdk/licensekit-client.php</code> from this plugin and place it inside your plugin or theme:</p>
+
+<pre><code>my-awesome-plugin/
+├── my-awesome-plugin.php
+├── lib/
+│   └── licensekit-client.php  ← copy here
+└── ...</code></pre>
+
+<h3>Step 2 — Boot the SDK from your plugin's main file</h3>
+
+<p>Add this near the top of your plugin's bootstrap. Replace the <code>server_url</code> with your shop URL and the <code>public_key</code> with the Ed25519 public key from your LicenseKit Settings page.</p>
+
+<pre><code>&lt;?php
+defined( 'ABSPATH' ) || exit;
+define( 'MYP_VERSION', '1.0.0' );
+
+require_once __DIR__ . '/lib/licensekit-client.php';
+
+add_action( 'plugins_loaded', static function () {
+    \LicenseKit_Client_v1::boot( [
+        'product_slug'       =&gt; 'my-awesome-plugin',
+        'plugin_file'        =&gt; __FILE__,
+        'item_type'          =&gt; 'plugin',
+        'server_url'         =&gt; 'https://shop.example.com',
+        'version'            =&gt; MYP_VERSION,
+        'license_option_key' =&gt; 'myp_license',
+        'text_domain'        =&gt; 'my-awesome-plugin',
+        'render_field_hook'  =&gt; 'myp_render_license_field',
+        'public_key'         =&gt; 'BASE64_ED25519_PUBLIC_KEY_FROM_SETTINGS',
+    ] );
+}, 5 );</code></pre>
+
+<h3>Step 3 — Render the license field in your settings page</h3>
+
+<p>Anywhere you want the license input + Activate button to appear, do:</p>
+
+<pre><code>&lt;?php do_action( 'myp_render_license_field' ); ?&gt;</code></pre>
+
+<p>The hook name is whatever you passed as <code>render_field_hook</code>. The SDK takes care of the input, the button, the status badge, and the form-post handler.</p>
+
+<h3>Theme variant</h3>
+
+<p>For themes, swap <code>plugin_file</code> for <code>stylesheet</code> and set <code>item_type</code> to <code>'theme'</code>:</p>
+
+<pre><code>require_once get_stylesheet_directory() . '/lib/licensekit-client.php';
+\LicenseKit_Client_v1::boot( [
+    'product_slug'       =&gt; 'my-theme',
+    'stylesheet'         =&gt; get_stylesheet(),
+    'item_type'          =&gt; 'theme',
+    'server_url'         =&gt; 'https://shop.example.com',
+    'version'            =&gt; wp_get_theme()-&gt;get( 'Version' ),
+    'license_option_key' =&gt; 'mytheme_license',
+    'text_domain'        =&gt; 'my-theme',
+    'render_field_hook'  =&gt; 'mytheme_render_license_field',
+    'public_key'         =&gt; 'BASE64_ED25519_PUBLIC_KEY_FROM_SETTINGS',
+] );</code></pre>
+
+<hr>
+
+<h2 id="sdk-config">Client SDK configuration reference</h2>
+
+<table>
+  <thead>
+    <tr><th>Key</th><th>Required</th><th>What it is</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>product_slug</code></td><td>Yes</td><td>Identifier you registered in LicenseKit (the same slug used in the URL of the product).</td></tr>
+    <tr><td><code>plugin_file</code> / <code>stylesheet</code></td><td>Yes</td><td>For plugins: pass <code>__FILE__</code>. For themes: pass <code>get_stylesheet()</code>.</td></tr>
+    <tr><td><code>item_type</code></td><td>Yes</td><td><code>'plugin'</code> or <code>'theme'</code>.</td></tr>
+    <tr><td><code>server_url</code></td><td>Yes</td><td>Your shop URL. Must be HTTPS in production.</td></tr>
+    <tr><td><code>version</code></td><td>Yes</td><td>The current version of your plugin/theme. Used for "is there an update?" comparisons.</td></tr>
+    <tr><td><code>license_option_key</code></td><td>Yes</td><td>The <code>wp_options</code> key the SDK will use to store license state on the customer's site. Pick something unique.</td></tr>
+    <tr><td><code>public_key</code></td><td>Yes (production)</td><td>Your Ed25519 public key, copied from <em>License Kit → Settings</em>. Safe to embed in plugin source.</td></tr>
+    <tr><td><code>render_field_hook</code></td><td>Recommended</td><td>The <code>do_action()</code> name where you want the license-key input to appear.</td></tr>
+    <tr><td><code>text_domain</code></td><td>Recommended</td><td>Your plugin's text domain so SDK strings translate correctly.</td></tr>
+    <tr><td><code>check_period</code></td><td>No</td><td>How often the SDK re-validates the license, in seconds. Default 43200 (12 hours).</td></tr>
+    <tr><td><code>update_channel</code></td><td>No</td><td><code>'stable'</code> (default), <code>'beta'</code>, or <code>'rc'</code>.</td></tr>
+    <tr><td><code>capability</code></td><td>No</td><td>Capability required to activate/deactivate. Default <code>'manage_options'</code>.</td></tr>
+    <tr><td><code>dev_mode</code></td><td>No</td><td>When true, allows non-HTTPS server URLs and skips signature verification. <strong>Never</strong> set in production.</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2 id="customer-flow">What customers experience</h2>
+
+<ol>
+  <li>They buy your plugin through your EDD or WooCommerce checkout.</li>
+  <li>The post-checkout receipt page and email both show their license key in a "Your License Keys" table.</li>
+  <li>They download the plugin zip from your shop, upload it to their WordPress, activate it.</li>
+  <li>They visit your plugin's settings page and paste their key into the license field, then click <strong>Activate</strong>.</li>
+  <li>Done. Updates flow through WordPress's standard <em>Plugins → Updates</em> screen. Changelogs appear in the "View details" popup.</li>
+</ol>
+
+<p>If you place the <code>[licensekit_customer_licenses]</code> shortcode on a page (typically the EDD or WooCommerce account page), customers can see all their licenses with a click-to-copy key field, status badge, activations used / limit, expiry, and a <strong>Rotate Key</strong> button.</p>
+
+<div class="callout callout-info">
+  <strong>Self-rotate:</strong> if a customer suspects their key has been compromised or just wants a fresh one, they click "Rotate Key". The new key inherits the existing expiry (no extra validity is added) and existing activations on real sites continue working — only their <em>cached</em> key text on each site needs to be updated. Rate-limited to 3 rotations per license per day.
+</div>
+
+<hr>
+
+<h2 id="license-states">License states and lifecycle</h2>
+
+<table>
+  <thead><tr><th>State</th><th>Validation works?</th><th>Updates available?</th><th>How it gets here</th></tr></thead>
+  <tbody>
+    <tr><td><code>active</code></td><td>Yes</td><td>Yes</td><td>Default state on issuance.</td></tr>
+    <tr><td><code>expired</code></td><td>Sometimes (in grace)</td><td>No</td><td>Past <code>expires_at</code>. If <code>grace_until</code> is set and in the future, validation still works; downloads always denied.</td></tr>
+    <tr><td><code>disabled</code></td><td>No</td><td>No</td><td>Manually paused by the vendor (e.g. payment dispute).</td></tr>
+    <tr><td><code>revoked</code></td><td>No</td><td>No</td><td>Auto-set on refund, or manually by vendor for abuse.</td></tr>
+    <tr><td><code>pending</code></td><td>No</td><td>No</td><td>Awaiting first payment (rare; for offline-pay flows).</td></tr>
+  </tbody>
+</table>
+
+<p>Activation rows have their own simpler lifecycle: <code>active</code> when a site is using the license, <code>deactivated</code> when the site removed itself or admin revoked, <code>revoked</code> for explicit per-site bans. There's only ever one row per <code>(license, site)</code> pair — re-activating flips the existing row's status back to <code>active</code> and updates the <code>activated_at</code> timestamp.</p>
+
+<hr>
+
+<h2 id="admin-pages">Vendor admin pages</h2>
+
+<p>Under <strong>License Kit</strong> in the WordPress admin sidebar:</p>
+
+<table>
+  <thead><tr><th>Page</th><th>What you do here</th></tr></thead>
+  <tbody>
+    <tr><td>Dashboard</td><td>At-a-glance counters and a recent-activity feed.</td></tr>
+    <tr><td>Products</td><td>Create products manually, link them to EDD downloads, set the <em>name</em>, <em>slug</em>, <em>type</em>.</td></tr>
+    <tr><td>Releases</td><td>Per product: upload zips, set channel (stable / beta / rc), write changelog markdown, set "tested up to" / "requires WP" / "requires PHP".</td></tr>
+    <tr><td>Licenses</td><td>List with filters by product, status, customer email. Manually issue licenses. Click any row to see details, rotate the key, extend expiry, change status, view per-license activations.</td></tr>
+    <tr><td>Activations</td><td>Recent active or stale (&gt;30d unseen) sites across all licenses. Revoke individual activations.</td></tr>
+    <tr><td>API Tokens</td><td>Generate Bearer tokens for the Vendor REST API, scoped to specific abilities (e.g. <code>licenses.read</code>, <code>releases.write</code>).</td></tr>
+    <tr><td>Webhooks</td><td>Subscribe an external URL to events: <code>license.issued</code>, <code>license.activated</code>, <code>release.created</code>, etc.</td></tr>
+    <tr><td>Logs</td><td>Read-only audit trail. Pruned daily; default retention 90 days.</td></tr>
+    <tr><td>Settings</td><td>Public key (copy into SDK), secrets (move to wp-config.php for production), grace period, "Delete data on uninstall" toggle, "Rotate Secrets" button.</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2 id="rest-api">Vendor REST API</h2>
+
+<p>For automating release uploads from CI/CD and integrating with your own tooling. All admin endpoints live at <code>/wp-json/licensekit/v1/admin/*</code> and require a <strong>Bearer token</strong> in the <code>Authorization</code> header.</p>
+
+<h3>Generating a token</h3>
+
+<p>Open <strong>License Kit → API Tokens</strong> in the admin, click <em>Create Token</em>. The full token is shown <strong>once</strong> — store it in your CI's secret manager. The token format is <code>lk_xxxxxxxx_yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy</code>; only the prefix is recoverable later.</p>
+
+<h3>Endpoints</h3>
+
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Required ability</th></tr></thead>
+  <tbody>
+    <tr><td>GET</td><td><code>/admin/products</code></td><td><code>products.read</code></td></tr>
+    <tr><td>POST</td><td><code>/admin/products</code></td><td><code>products.write</code></td></tr>
+    <tr><td>GET / PUT / DELETE</td><td><code>/admin/products/{id}</code></td><td><code>products.read</code> / <code>.write</code></td></tr>
+    <tr><td>GET</td><td><code>/admin/products/{id}/releases</code></td><td><code>releases.read</code></td></tr>
+    <tr><td>POST</td><td><code>/admin/products/{id}/releases</code> (multipart, <code>file=&lt;zip&gt;</code>)</td><td><code>releases.write</code></td></tr>
+    <tr><td>GET / PUT / DELETE</td><td><code>/admin/releases/{id}</code></td><td><code>releases.read</code> / <code>.write</code></td></tr>
+    <tr><td>GET</td><td><code>/admin/licenses</code> (filterable by <code>product_id</code>, <code>status</code>, <code>customer_email</code>)</td><td><code>licenses.read</code></td></tr>
+    <tr><td>POST</td><td><code>/admin/licenses</code> (manual issue — returns raw key once)</td><td><code>licenses.write</code></td></tr>
+    <tr><td>GET / PUT / DELETE</td><td><code>/admin/licenses/{id}</code></td><td><code>licenses.read</code> / <code>.write</code></td></tr>
+    <tr><td>POST</td><td><code>/admin/licenses/{id}/rotate-key</code> (returns new raw key once)</td><td><code>licenses.write</code></td></tr>
+    <tr><td>POST</td><td><code>/admin/licenses/{id}/extend</code> (body: <code>{period: "1y"}</code>)</td><td><code>licenses.write</code></td></tr>
+    <tr><td>GET</td><td><code>/admin/licenses/{id}/activations</code></td><td><code>licenses.read</code></td></tr>
+    <tr><td>DELETE</td><td><code>/admin/activations/{id}</code> (revoke)</td><td><code>licenses.write</code></td></tr>
+    <tr><td>GET / POST / PUT / DELETE</td><td><code>/admin/webhooks</code> et al</td><td><code>webhooks.read</code> / <code>.write</code></td></tr>
+    <tr><td>GET</td><td><code>/admin/logs</code> (filterable by <code>subject_type</code>, <code>subject_id</code>)</td><td><code>logs.read</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Example: upload a release from a CI script</h3>
+
+<pre><code>curl -X POST \
+  -H "Authorization: Bearer lk_abc12345_xxx..." \
+  -F "version=1.5.0" \
+  -F "channel=stable" \
+  -F "changelog_md=- Fixed bug X
+- Added feature Y" \
+  -F "tested_up_to=6.4" \
+  -F "file=@./build/my-plugin-1.5.0.zip" \
+  https://shop.example.com/wp-json/licensekit/v1/admin/products/42/releases</code></pre>
+
+<hr>
+
+<h2 id="webhooks">Webhooks</h2>
+
+<p>LicenseKit can call any URL you configure when license or release events happen. Set them up at <strong>License Kit → Webhooks</strong>.</p>
+
+<h3>Events</h3>
+
+<ul>
+  <li><code>license.issued</code> — a new license was created (purchase, manual, or renewal).</li>
+  <li><code>license.activated</code> — a customer site activated a license.</li>
+  <li><code>license.deactivated</code> — a customer site deactivated.</li>
+  <li><code>license.rotated</code> — license key was rotated (admin or self-service).</li>
+  <li><code>license.extended</code> — expiry extended (renewal or admin).</li>
+  <li><code>license.status_changed</code> — status flipped between active/expired/disabled/revoked.</li>
+  <li><code>license.suspicious_activity</code> — too many failed activations on one key.</li>
+  <li><code>release.created</code> — a new release was uploaded.</li>
+  <li><code>release.deleted</code> — a release was deleted.</li>
+  <li><code>release.downloaded</code> — a customer downloaded a release zip.</li>
+</ul>
+
+<h3>Delivery format</h3>
+
+<p>POST request, JSON body, with these headers:</p>
+
+<pre><code>Content-Type: application/json
+X-LicenseKit-Event:     license.issued
+X-LicenseKit-Delivery:  &lt;numeric delivery id&gt;
+X-LicenseKit-Signature: sha256=&lt;hex&gt;</code></pre>
+
+<p>Verify the signature on your end:</p>
+
+<pre><code>$expected = 'sha256=' . hash_hmac( 'sha256', $raw_body, $webhook_secret );
+$signature = $_SERVER['HTTP_X_LICENSEKIT_SIGNATURE'] ?? '';
+if ( ! hash_equals( $expected, $signature ) ) {
+    http_response_code( 403 );
+    exit;
+}</code></pre>
+
+<p>If your endpoint returns 2xx the delivery succeeds. Non-2xx responses trigger exponential-backoff retries: 1m → 5m → 15m → 1h → 2h, then give up after 5 attempts.</p>
+
+<hr>
+
+<h2 id="security">Security model</h2>
+
+<table>
+  <thead><tr><th>Concern</th><th>How LicenseKit handles it</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Update tampering / supply chain</td>
+      <td>Every server response is signed with Ed25519. The vendor's <em>private</em> key stays on the server; the SDK ships with the matching <em>public</em> key. An attacker reading the plugin source gets only the public key, which can verify but cannot forge.</td>
+    </tr>
+    <tr>
+      <td>Plugin zip integrity</td>
+      <td>Releases are stored under <code>uploads/licensekit/releases/</code> with a <code>.htaccess</code> deny-all + <code>web.config</code> deny-all. Downloads go through a PHP endpoint with a 5-minute, single-use, HMAC-signed token. Direct URL access to the zip is blocked.</td>
+    </tr>
+    <tr>
+      <td>License-key brute force</td>
+      <td>Per-IP rate limit (30/min on license endpoints), per-key rate limit (10/min on activate). After 5 failed activations on the same key within 15 minutes, the key is locked out for 15 minutes and a <code>license.suspicious_activity</code> webhook fires.</td>
+    </tr>
+    <tr>
+      <td>HTTPS</td>
+      <td>Public REST endpoints reject non-HTTPS requests unless <code>LICENSEKIT_ALLOW_HTTP</code> is defined (development only). The Client SDK refuses non-HTTPS server URLs unless <code>dev_mode</code> is on.</td>
+    </tr>
+    <tr>
+      <td>License key at rest</td>
+      <td>Stored as a peppered SHA-256 hash for lookup, plus a sodium-encrypted copy for the customer dashboard "reveal" feature. The encryption key derives from the pepper, so a leaked database alone (without <code>wp-config.php</code>) cannot recover keys.</td>
+    </tr>
+    <tr>
+      <td>GDPR</td>
+      <td>Standard WordPress privacy tools: <em>Tools → Export Personal Data</em> and <em>Erase Personal Data</em> include all LicenseKit licenses and activations matching the customer's email.</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2 id="production-checklist">Production checklist</h2>
+
+<ol>
+  <li>HTTPS everywhere: shop URL, customer URLs, all webhook URLs.</li>
+  <li>Move all five secrets to <code>wp-config.php</code> (see <em>Vendor installation</em> above).</li>
+  <li>Set <strong>Settings → Delete data on uninstall</strong> according to your operator policy.</li>
+  <li>Configure <strong>Settings → Grace period</strong> (default 14 days; set 0 to disable).</li>
+  <li>Test the full purchase loop in EDD/WC test mode before going live.</li>
+  <li>Subscribe at least one webhook to <code>license.suspicious_activity</code> so you get alerted to brute force.</li>
+  <li>For each plugin/theme you ship: confirm that <code>dev_mode</code> is <strong>not</strong> set when you build the production zip.</li>
+  <li>Document a customer-support flow: "I lost my license key" → direct them to the <code>[licensekit_customer_licenses]</code> shortcoded page on your site.</li>
+</ol>
+
+<hr>
+
+<h2 id="extension-filters">Extension filters</h2>
+
+<p>LicenseKit exposes a small set of filters and actions for vendors who want to customize behavior without forking the plugin. Apply them from your theme's <code>functions.php</code> or a small "must-use" plugin in <code>wp-content/mu-plugins/</code>.</p>
+
+<h3>Customizing tier and expiry labels</h3>
+
+<p>The default tier dropdown ships with technical labels (Single site / Five sites / Unlimited / Custom). Replace them with whatever marketing labels match your offering — Personal / Studio / Agency, Indie / Pro / Enterprise, etc. The label is purely cosmetic; the actual enforcement uses <code>activation_limit</code>.</p>
+
+<pre><code>add_filter( 'licensekit_tier_options', function ( $tiers ) {
+    return [
+        'personal' =&gt; __( 'Personal — 1 site' ),
+        'studio'   =&gt; __( 'Studio — 5 sites' ),
+        'agency'   =&gt; __( 'Agency — 25 sites' ),
+        'unlimited' =&gt; __( 'Unlimited' ),
+    ];
+} );
+
+add_filter( 'licensekit_expiry_options', function ( $periods ) {
+    return [
+        '3m'       =&gt; __( '3 months' ),
+        '1y'       =&gt; __( '1 year' ),
+        '2y'       =&gt; __( '2 years' ),
+        'lifetime' =&gt; __( 'Lifetime' ),
+    ];
+} );</code></pre>
+
+<div class="callout callout-warn">
+  <strong>Set tier and activation_limit consistently.</strong> If you choose <code>tier='agency'</code> in the dropdown but leave <code>activation_limit=1</code>, customers will see "Agency" but only get one activation. Pick a tier value and put the matching limit in the field below it.
+</div>
+
+<h3>Adjusting the grace period</h3>
+
+<p>By default, an expired license remains usable for 14 days after expiry (downloads are still denied during grace; only validation succeeds). Change this with:</p>
+
+<pre><code>add_filter( 'licensekit_grace_period_days', function () {
+    return 30; // give customers a 30-day grace window
+} );</code></pre>
+
+<h3>Tweaking log retention</h3>
+
+<p>Audit logs are pruned daily; default 90 days. Raise or lower:</p>
+
+<pre><code>add_filter( 'licensekit_log_retention_days', function () {
+    return 365;
+} );</code></pre>
+
+<h3>Programmatic license-active override</h3>
+
+<p>Useful for emergency overrides or test rigs. Returning <code>true</code> here treats the license as active for a single page load even if the server says otherwise:</p>
+
+<pre><code>add_filter( 'loginless_pro_license_active', function ( $active, $key ) {
+    if ( defined( 'WP_CLI' ) && WP_CLI ) {
+        return true; // Always active in WP-CLI context
+    }
+    return $active;
+}, 10, 2 );</code></pre>
+
+<h3>Domain customization (SDK side)</h3>
+
+<p>From your plugin source, override the LicenseKit server URL or public key with filters so site operators can swap them in <code>wp-config.php</code> without editing your shipped code:</p>
+
+<pre><code>// In your plugin's main file, replacing the hardcoded values
+add_filter( 'loginless_pro_licensekit_server', function ( $url ) {
+    return defined( 'MY_LICENSE_SERVER' ) ? MY_LICENSE_SERVER : $url;
+} );</code></pre>
+
+<h3>Domain events you can hook</h3>
+
+<p>Every license lifecycle event fires a WordPress action you can listen to:</p>
+
+<table>
+  <thead><tr><th>Action</th><th>Args</th></tr></thead>
+  <tbody>
+    <tr><td><code>licensekit_license_issued</code></td><td><code>$license, $product, $raw_key</code></td></tr>
+    <tr><td><code>licensekit_license_activated</code></td><td><code>$license, $product, $site_url, $environment</code></td></tr>
+    <tr><td><code>licensekit_license_deactivated</code></td><td><code>$license, $site_url</code></td></tr>
+    <tr><td><code>licensekit_license_rotated</code></td><td><code>$license, $new_raw_key</code></td></tr>
+    <tr><td><code>licensekit_license_extended</code></td><td><code>$license_id, $new_expires_at</code></td></tr>
+    <tr><td><code>licensekit_license_status_changed</code></td><td><code>$license_id, $to, $from</code></td></tr>
+    <tr><td><code>licensekit_release_created</code></td><td><code>$release, $product</code></td></tr>
+    <tr><td><code>licensekit_release_deleted</code></td><td><code>$release</code></td></tr>
+    <tr><td><code>licensekit_suspicious_activity</code></td><td><code>$key_hash, $ip</code></td></tr>
+  </tbody>
+</table>
+
+<p>For receiving these events on a remote system, prefer subscribing to the equivalent webhook (set up at <strong>License Kit → Webhooks</strong>) — it includes signature verification and retry-with-backoff out of the box.</p>
+
+<hr>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<h4>Customer says "License key not recognized"</h4>
+<p>Check <strong>License Kit → Logs</strong>. If you see <code>license.activate</code> attempts with <code>error: invalid_key</code>, the key the customer typed doesn't match anything in your DB. Common causes: typo, key was rotated and they're using the old one, or they bought from a different vendor's shop. The license-prefix search in the Licenses page can help confirm the key exists.</p>
+
+<h4>Customer's plugin doesn't see updates</h4>
+<p>From the customer's site: <em>WordPress dashboard → Tools → Site Health → Info → WordPress Constants</em>. Confirm <code>WP_DEBUG</code> is off (otherwise the SDK runs in dev mode). On their <em>Plugins → Updates</em> screen, click <em>Check again</em> to force-refresh transients. If still nothing, increase your release version and verify the <code>current_version</code> on the LicenseKit Product reflects the new release.</p>
+
+<h4>Receipt email doesn't show the license key</h4>
+<p>LicenseKit auto-appends a "Your License Keys" block to the EDD/WC purchase receipt email body. If it's missing, check that you (a) marked the order as completed (LicenseKit only fires on <code>edd_complete_purchase</code> / <code>woocommerce_order_status_completed</code>), and (b) the product had "Issue a license key on purchase" enabled <em>before</em> the order was placed.</p>
+
+<h4>Activations limit reached unexpectedly</h4>
+<p>Local environments (<code>localhost</code>, <code>*.local</code>, <code>*.test</code>, RFC1918 IP ranges) are exempt from activation limits by default. Staging environments where the customer's <code>WP_ENVIRONMENT_TYPE</code> is <code>'staging'</code> are also exempt. If a real site is being mis-detected, customers can set <code>WP_ENVIRONMENT_TYPE</code> to <code>'staging'</code> in their <code>wp-config.php</code>.</p>
+
+<hr>
+
+<h2 id="faq">FAQ</h2>
+
+<h4>Does LicenseKit work without WooCommerce or EDD?</h4>
+<p>Yes — you can issue licenses manually from the admin, or via the REST API. The e-commerce bridges only automate issuance on purchase; nothing else depends on them.</p>
+
+<h4>Can I migrate from EDD Software Licensing?</h4>
+<p>v1 doesn't include a migration importer. It's planned for v1.1.</p>
+
+<h4>What happens when a customer's license expires?</h4>
+<p>If you've configured a grace period (default 14 days), validation still succeeds during grace — their plugin keeps working. <em>Downloads are denied during grace</em>, so they can't get new updates without renewing. After grace expires, validation fails and the SDK simply stops injecting updates; the host plugin's other functionality is never disabled.</p>
+
+<h4>Can I let a customer use the same license on a staging site without it counting?</h4>
+<p>Yes — the SDK auto-detects local and staging environments and reports them to the server, which exempts them from activation limits.</p>
+
+<h4>What if I lose my Ed25519 private key?</h4>
+<p>The private key is auto-generated on plugin activation and stored in either <code>wp-config.php</code> or <code>wp_options</code>. If you lose both (e.g. catastrophic server failure with no backup), open <strong>Settings → Rotate Secrets</strong> on a fresh install. This generates a new keypair. You then need to ship updated plugins to your customers with the new public key — old plugins won't be able to verify responses signed by the new private key.</p>
+
+<h4>Is there a CDN / S3 option for release downloads?</h4>
+<p>Not in v1 — releases stream from PHP. For high-volume scenarios, you can put a CDN in front of the entire WordPress site; the signed-token URL is unique per request so caching is fine.</p>
+
+</main>
+</div>
+</body>
+</html>
