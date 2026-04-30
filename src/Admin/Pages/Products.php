@@ -58,7 +58,7 @@ final class Products extends AbstractPage {
 
 		$products = $this->repo->find_all( 100, 0 );
 		if ( empty( $products ) ) {
-			echo '<p>' . esc_html__( 'No products yet. Add one or buy a licensed EDD download to auto-create.', 'licensekit' ) . '</p>';
+			echo '<p>' . esc_html__( 'No products yet. Add one, or sell a licensed EDD download / WooCommerce product to auto-create.', 'licensekit' ) . '</p>';
 		} else {
 			echo '<table class="wp-list-table widefat striped lk-table">';
 			echo '<thead><tr>';
@@ -67,6 +67,7 @@ final class Products extends AbstractPage {
 			echo '<th>' . esc_html__( 'Type', 'licensekit' ) . '</th>';
 			echo '<th>' . esc_html__( 'Current Version', 'licensekit' ) . '</th>';
 			echo '<th>' . esc_html__( 'EDD Download', 'licensekit' ) . '</th>';
+			echo '<th>' . esc_html__( 'WooCommerce Product', 'licensekit' ) . '</th>';
 			echo '<th>' . esc_html__( 'Actions', 'licensekit' ) . '</th>';
 			echo '</tr></thead><tbody>';
 			foreach ( $products as $p ) {
@@ -82,6 +83,7 @@ final class Products extends AbstractPage {
 				echo '<td>' . esc_html( $p->type ) . '</td>';
 				echo '<td>' . esc_html( $p->current_version ?? '—' ) . '</td>';
 				echo '<td>' . ( $p->edd_download_id ? '<a href="' . esc_url( get_edit_post_link( $p->edd_download_id ) ) . '">#' . esc_html( (string) $p->edd_download_id ) . '</a>' : '—' ) . '</td>';
+				echo '<td>' . ( $p->wc_product_id ? '<a href="' . esc_url( get_edit_post_link( $p->wc_product_id ) ) . '">#' . esc_html( (string) $p->wc_product_id ) . '</a>' : '—' ) . '</td>';
 				echo '<td><a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Edit', 'licensekit' ) . '</a> | '
 					. '<a href="' . esc_url( $rel_url ) . '">' . esc_html__( 'Releases', 'licensekit' ) . '</a> | '
 					. '<a href="' . esc_url( $del_url ) . '" onclick="return confirm(\'' . esc_js( __( 'Delete this product?', 'licensekit' ) ) . '\')">'
@@ -128,14 +130,42 @@ final class Products extends AbstractPage {
 						</select>
 					</td>
 				</tr>
+				<?php if ( class_exists( 'Easy_Digital_Downloads' ) ) : ?>
 				<tr>
 					<th><label for="edd_download_id"><?php esc_html_e( 'EDD Download ID', 'licensekit' ); ?></label></th>
 					<td>
 						<input name="edd_download_id" id="edd_download_id" type="number" min="0"
 							value="<?php echo esc_attr( (string) ( $product->edd_download_id ?? '' ) ); ?>">
+						<?php
+						if ( ! empty( $product->edd_download_id ) ) {
+							$edd_link = get_edit_post_link( (int) $product->edd_download_id );
+							if ( $edd_link ) {
+								echo ' <a href="' . esc_url( $edit_link = $edd_link ) . '">' . esc_html__( 'Open download', 'licensekit' ) . '</a>';
+							}
+						}
+						?>
 						<p class="description"><?php esc_html_e( 'Optional — link to an EDD download to issue licenses on purchase.', 'licensekit' ); ?></p>
 					</td>
 				</tr>
+				<?php endif; ?>
+				<?php if ( class_exists( 'WooCommerce' ) ) : ?>
+				<tr>
+					<th><label for="wc_product_id"><?php esc_html_e( 'WooCommerce Product ID', 'licensekit' ); ?></label></th>
+					<td>
+						<input name="wc_product_id" id="wc_product_id" type="number" min="0"
+							value="<?php echo esc_attr( (string) ( $product->wc_product_id ?? '' ) ); ?>">
+						<?php
+						if ( ! empty( $product->wc_product_id ) ) {
+							$wc_link = get_edit_post_link( (int) $product->wc_product_id );
+							if ( $wc_link ) {
+								echo ' <a href="' . esc_url( $wc_link ) . '">' . esc_html__( 'Open product', 'licensekit' ) . '</a>';
+							}
+						}
+						?>
+						<p class="description"><?php esc_html_e( 'Optional — link to a WooCommerce product to issue licenses on purchase. Remember to enable the LicenseKit panel on the product editor too.', 'licensekit' ); ?></p>
+					</td>
+				</tr>
+				<?php endif; ?>
 				<tr>
 					<th><label for="author"><?php esc_html_e( 'Author', 'licensekit' ); ?></label></th>
 					<td><input name="author" id="author" type="text" class="regular-text" value="<?php echo esc_attr( $product->author ?? '' ); ?>"></td>
@@ -175,6 +205,44 @@ final class Products extends AbstractPage {
 			exit;
 		}
 
+		$edd_download_id = isset( $_POST['edd_download_id'] ) && '' !== $_POST['edd_download_id'] ? (int) $_POST['edd_download_id'] : null;
+		$wc_product_id   = isset( $_POST['wc_product_id'] ) && '' !== $_POST['wc_product_id'] ? (int) $_POST['wc_product_id'] : null;
+
+		// The schema enforces UNIQUE on edd_download_id and wc_product_id; catch
+		// the conflict before the DB call so we can show a friendly message.
+		if ( null !== $edd_download_id ) {
+			$conflict = $this->repo->find_by_edd_download_id( $edd_download_id );
+			if ( $conflict instanceof Product && (int) $conflict->id !== $id ) {
+				$this->set_flash(
+					'error',
+					sprintf(
+						/* translators: 1: existing product name, 2: existing product slug */
+						__( 'EDD download #%1$d is already linked to "%2$s". Pick a different download or unlink it first.', 'licensekit' ),
+						$edd_download_id,
+						(string) $conflict->name
+					)
+				);
+				wp_safe_redirect( $this->admin_url( 'licensekit-products', [ 'action' => $id > 0 ? 'edit' : 'new', 'id' => $id ] ) );
+				exit;
+			}
+		}
+		if ( null !== $wc_product_id ) {
+			$conflict = $this->repo->find_by_wc_product_id( $wc_product_id );
+			if ( $conflict instanceof Product && (int) $conflict->id !== $id ) {
+				$this->set_flash(
+					'error',
+					sprintf(
+						/* translators: 1: WC product id, 2: existing product name */
+						__( 'WooCommerce product #%1$d is already linked to "%2$s". Pick a different product or unlink it first.', 'licensekit' ),
+						$wc_product_id,
+						(string) $conflict->name
+					)
+				);
+				wp_safe_redirect( $this->admin_url( 'licensekit-products', [ 'action' => $id > 0 ? 'edit' : 'new', 'id' => $id ] ) );
+				exit;
+			}
+		}
+
 		$now = Helpers::now_utc();
 		if ( $id > 0 ) {
 			$this->repo->update(
@@ -182,7 +250,8 @@ final class Products extends AbstractPage {
 				[
 					'name'            => $name,
 					'type'            => $type,
-					'edd_download_id' => isset( $_POST['edd_download_id'] ) && '' !== $_POST['edd_download_id'] ? (int) $_POST['edd_download_id'] : null,
+					'edd_download_id' => $edd_download_id,
+					'wc_product_id'   => $wc_product_id,
 					'author'          => sanitize_text_field( wp_unslash( (string) ( $_POST['author'] ?? '' ) ) ),
 					'homepage_url'    => esc_url_raw( wp_unslash( (string) ( $_POST['homepage_url'] ?? '' ) ) ),
 					'updated_at'      => $now,
@@ -193,7 +262,8 @@ final class Products extends AbstractPage {
 			$p->slug            = $slug;
 			$p->name            = $name;
 			$p->type            = $type;
-			$p->edd_download_id = isset( $_POST['edd_download_id'] ) && '' !== $_POST['edd_download_id'] ? (int) $_POST['edd_download_id'] : null;
+			$p->edd_download_id = $edd_download_id;
+			$p->wc_product_id   = $wc_product_id;
 			$p->author          = sanitize_text_field( wp_unslash( (string) ( $_POST['author'] ?? '' ) ) );
 			$p->homepage_url    = esc_url_raw( wp_unslash( (string) ( $_POST['homepage_url'] ?? '' ) ) );
 			$p->meta            = [];

@@ -21,6 +21,7 @@ use LicenseKit\Repositories\ProductRepository;
 use LicenseKit\Services\AuditLogger;
 use LicenseKit\Services\LicenseService;
 use LicenseKit\WooCommerce\Bridge;
+use LicenseKit\WooCommerce\EmailIntegration;
 use LicenseKit\WooCommerce\ProductSettings;
 use Mockery;
 use PHPUnit\Framework\TestCase;
@@ -65,6 +66,38 @@ final class BridgeTest extends TestCase {
 		// Sanity: refund hooks remain in place.
 		$this->assertArrayHasKey( 'woocommerce_order_status_refunded', $hooks );
 		$this->assertArrayHasKey( 'woocommerce_order_refunded', $hooks );
+	}
+
+	/**
+	 * Regression: the email integration MUST hook the order-details template
+	 * (not the thankyou-only hook) so license keys appear on
+	 * `/my-account/view-order/{id}/` for returning customers, and the email
+	 * after-table hook so they appear in the customer's order email.
+	 */
+	public function test_email_integration_hooks_both_email_and_order_details_paths(): void {
+		$bridge = $this->make_bridge();
+		( new EmailIntegration( $bridge ) )->register();
+
+		$hooks = $GLOBALS['__lk_actions'];
+		$this->assertArrayHasKey(
+			'woocommerce_email_after_order_table',
+			$hooks,
+			'Order email rendering must be wired (in-email license block)'
+		);
+		$this->assertArrayHasKey(
+			'woocommerce_order_details_after_order_table',
+			$hooks,
+			'Front-end order-details rendering must be wired (covers both Thank-you AND view-order)'
+		);
+
+		// Make sure we did NOT keep the narrower thankyou-only hook — that
+		// would cause double-rendering on the post-checkout page because the
+		// order-details template is included inside thankyou.php.
+		$this->assertArrayNotHasKey(
+			'woocommerce_thankyou',
+			$hooks,
+			'Use woocommerce_order_details_after_order_table instead — covers thankyou + view-order without double-rendering'
+		);
 	}
 
 	public function test_on_order_paid_issues_a_license_per_quantity_unit(): void {

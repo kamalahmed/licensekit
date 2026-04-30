@@ -30,7 +30,17 @@
     -->
     <rule ref="WordPress.Security"/>
     <rule ref="WordPress.WP.AlternativeFunctions"/>
-    <rule ref="WordPress.WP.Capabilities"/>
+    <rule ref="WordPress.WP.Capabilities">
+        <properties>
+            <!-- Capabilities provided by host plugins (EDD/WooCommerce) that the sniff doesn't know about. -->
+            <property name="custom_capabilities" type="array">
+                <element value="manage_woocommerce"/>
+                <element value="manage_shop_settings"/>
+                <element value="view_woocommerce_reports"/>
+                <element value="manage_shop_orders"/>
+            </property>
+        </properties>
+    </rule>
     <rule ref="WordPress.DB.DirectDatabaseQuery"/>
     <rule ref="WordPress.DB.PreparedSQL"/>
     <rule ref="WordPress.DB.PreparedSQLPlaceholders"/>
