@@ -1,0 +1,51 @@
+# Files and directories excluded from the WordPress.org build.
+#
+# Used by `bin/build-zip.sh` and the GitHub release workflow. The format
+# mirrors WP-CLI's `wp dist-archive` convention (one path per line, leading
+# slash anchors at plugin root, no globs).
+
+# VCS / dev metadata
+/.git
+/.github
+/.gitignore
+/.distignore
+/.DS_Store
+/Thumbs.db
+/.idea
+/.vscode
+/.claude
+
+# Composer / dependency dev files
+/composer.json
+/composer.lock
+
+# Test infra and artifacts
+/tests
+/phpunit.xml.dist
+/phpcs.xml.dist
+/.phpunit.cache
+/.phpunit.result.cache
+/coverage
+/build
+/dist
+
+# Repo docs (kept on GitHub, not shipped to WP.org)
+/CONTRIBUTING.md
+/SECURITY.md
+/CHANGELOG.md
+/README.md
+/docs
+
+# Client SDK is shipped via GitHub releases, not bundled with the
+# WP.org server plugin. The SDK file uses `pre_set_site_transient_update_*`
+# filters by design (it's a client-side updater) which the WP.org Plugin
+# Check tool flags as forbidden in hosted plugins.
+/client-sdk
+
+# Local debug helpers
+/_debug.php
+/_debug-*.php
+
+# Environment files
+/.env
+/.env.*

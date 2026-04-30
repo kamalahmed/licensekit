@@ -123,7 +123,7 @@ final class EDDSLImporter {
 				'posts_per_page'   => $limit,
 				'orderby'          => 'ID',
 				'order'            => 'ASC',
-				'suppress_filters' => true,
+				'suppress_filters' => false,
 				'no_found_rows'    => true,
 			]
 		);

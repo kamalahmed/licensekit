@@ -31,20 +31,34 @@ jobs:
         run: |
           mkdir -p build/licensekit
           rsync -a \
-            --exclude='/.github' \
             --exclude='/.git' \
+            --exclude='/.github' \
             --exclude='/.gitignore' \
+            --exclude='/.distignore' \
+            --exclude='.DS_Store' \
+            --exclude='Thumbs.db' \
+            --exclude='/.idea' \
+            --exclude='/.vscode' \
+            --exclude='/.claude' \
+            --exclude='/composer.json' \
+            --exclude='/composer.lock' \
             --exclude='/.phpunit.cache' \
             --exclude='/.phpunit.result.cache' \
             --exclude='/build' \
+            --exclude='/dist' \
             --exclude='/coverage' \
             --exclude='/tests' \
             --exclude='/docs' \
             --exclude='/phpunit.xml.dist' \
+            --exclude='/phpcs.xml.dist' \
+            --exclude='/client-sdk' \
             --exclude='/CONTRIBUTING.md' \
             --exclude='/SECURITY.md' \
             --exclude='/CHANGELOG.md' \
+            --exclude='/README.md' \
             --exclude='/_debug*' \
+            --exclude='/.env' \
+            --exclude='/.env.*' \
             ./ build/licensekit/
 
       - name: Create zip

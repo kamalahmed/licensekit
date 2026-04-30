@@ -2,7 +2,7 @@
 Contributors: kamalahmed
 Tags: license manager, software licensing, plugin updates, easy digital downloads, woocommerce
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 0.1.0
 License: GPL-2.0-or-later
@@ -42,7 +42,7 @@ LicenseKit acts as a server. **The plugin itself does NOT make outbound HTTP req
 
 If you configure webhooks in **License Kit → Webhooks**, the plugin will then make outbound HTTP POST requests to whichever URL(s) you configured, signed with HMAC-SHA256 using the per-webhook secret. Webhook URLs are explicitly opt-in.
 
-The Client SDK distributed as `client-sdk/licensekit-client.php` runs inside a vendor's customer's plugin. It makes outbound HTTP requests to the vendor's configured `server_url` for license activation, validation, and update checks. This is by design — without those requests, the SDK can't validate licenses or fetch updates.
+The Client SDK (`licensekit-client.php`, distributed separately via GitHub releases) runs inside a vendor's customer's plugin. It makes outbound HTTP requests to the vendor's configured `server_url` for license activation, validation, and update checks. This is by design — without those requests, the SDK can't validate licenses or fetch updates.
 
 == Installation ==
 
@@ -57,7 +57,7 @@ The Client SDK distributed as `client-sdk/licensekit-client.php` runs inside a v
        define( 'LICENSEKIT_SIGN_SECRET',     'paste-from-Settings' );
        define( 'LICENSEKIT_SIGN_PUBLIC',     'paste-from-Settings' );
 
-5. In your plugin or theme, drop `client-sdk/licensekit-client.php` into a `lib/` folder and call `\LicenseKit_Client_v1::boot([...])` with your configuration. See `client-sdk/examples/` for plugin and theme templates.
+5. In your plugin or theme, drop the LicenseKit Client SDK (`licensekit-client.php`) into a `lib/` folder and call `\LicenseKit_Client_v1::boot([...])` with your configuration. The client SDK and example templates are distributed separately from the WordPress.org build — download the latest copy from the LicenseKit GitHub releases page or from **License Kit → Tools → Client SDK** in the admin.
 
 == Frequently Asked Questions ==
 

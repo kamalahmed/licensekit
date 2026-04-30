@@ -16,7 +16,7 @@ if ( ! get_option( 'licensekit_delete_data_on_uninstall' ) ) {
 
 global $wpdb;
 
-$tables = [
+$licensekit_tables = [
 	'licensekit_logs',
 	'licensekit_webhook_deliveries',
 	'licensekit_webhooks',
@@ -27,19 +27,19 @@ $tables = [
 	'licensekit_products',
 ];
 
-foreach ( $tables as $table ) {
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}{$table}" ); // phpcs:ignore WordPress.DB
+foreach ( $licensekit_tables as $licensekit_table ) {
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}{$licensekit_table}" ); // phpcs:ignore WordPress.DB
 }
 
-$options = [
+$licensekit_options = [
 	'licensekit_db_version',
 	'licensekit_settings',
 	'licensekit_secrets',
 	'licensekit_delete_data_on_uninstall',
 ];
 
-foreach ( $options as $option ) {
-	delete_option( $option );
+foreach ( $licensekit_options as $licensekit_option ) {
+	delete_option( $licensekit_option );
 }
 
 wp_clear_scheduled_hook( 'licensekit_daily_cron' );
